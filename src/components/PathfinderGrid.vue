@@ -14,7 +14,7 @@
             @mouse-enter="mouseEnteredNode(rowIndex, colIndex)"
             @mouse-up="setMouseUp()"
             v-for="(node, colIndex) in row"
-            :key="((node.row+1) * (node.col+1))"
+            :key="(node.nodeId)"
             :rowIndex="rowIndex"
             :colIndex="colIndex"
             :isStart="node.isStart"
@@ -47,6 +47,9 @@
     <button @click="settingEndNode()">
       Place End Node
     </button>
+    <button @click="resetDrawnPath()">
+      Clear Drawn Path
+    </button>
 </template>
 
 <script>
@@ -71,7 +74,7 @@ export default {
         hasEndNode: true,
         startNodeReference: null,
         endNodeReference: null,
-        hasDrawnGrid: false,
+        hasDrawnAlgorithm: false,
         isMouseDown: false,
         willFillWall: false,
         allowedToDraw: true,
@@ -82,11 +85,12 @@ export default {
     methods: {
       generateInitialGrid() {
         const tempGrid = [];
+        let nodeId = 1;
         for (let row = 0; row < this.rowCount; row++) {
           const currentRow = [];
           for (let col = 0; col < this.colCount; col++) {
-            const currentNode = this.createNode(row, col);
-
+            const currentNode = this.createNode(row, col, nodeId);
+            nodeId++;
             if (currentNode.isStart) this.startNodeReference = currentNode
             if (currentNode.isEnd) this.endNodeReference = currentNode 
             currentRow.push(currentNode);
@@ -94,10 +98,9 @@ export default {
           tempGrid.push(currentRow)
         }
         this.grid = tempGrid;
-        this.hasDrawnGrid = false;
       },
 
-      createNode(row, col) {
+      createNode(row, col, nodeId) {
         return {
           col,
           row,
@@ -108,14 +111,46 @@ export default {
           isWall: false,
           previousNode: null,
           isDrawn: false,
+          isBackTracked: false,
+          nodeId,
         }
       },
-
+      resetDrawnPath(includeWall = false){
+        /*
+        This method will go through an existing grid and change the following properties:
+        isDrawn,
+        previousNode,
+        isVisited,
+        isBackTracked,
+        distance.
+        */
+        if (!this.hasDrawnAlgorithm) return;
+        for (let row = 0; row < this.rowCount; row++){
+          for (let col = 0; col < this.colCount; col++){
+            const node = this.grid[row][col];
+            const newNode = {
+              ...node,
+              isDrawn: false,
+              previousNode: null,
+              isVisited: false,
+              isBackTracked: false,
+              distance: Infinity,
+            }
+            if (includeWall) newNode.isWall = false;
+            this.grid[row][col] = newNode;
+            // we actually remove the previous references with the new assignment,
+            // so we need to re-assign it.
+            if (newNode.isStart) this.startNodeReference = newNode;
+            if (newNode.isEnd) this.endNodeReference = newNode;
+          }
+        }
+        console.log(this.grid.length, this.grid[0].length);
+      },
       runDijkstra(){
-        if (this.hasDrawnGrid) {
+        if (this.hasDrawnAlgorithm) {
           // reset the grid
-          this.generateInitialGrid();
-          this.hasDrawnGrid = false;
+          this.resetDrawnPath();
+          this.hasDrawnAlgorithm = false;
         }
         const visitedNodesInOrder = dijkstra(this.grid.slice(), this.startNodeReference, this.endNodeReference);
         console.log(visitedNodesInOrder);
@@ -136,7 +171,7 @@ export default {
             }, i * 10);
           } 
         }
-        this.hasDrawnGrid = true;
+        this.hasDrawnAlgorithm = true;
       },
 
       setMouseDown(rowIndex, colIndex) {
@@ -144,6 +179,8 @@ export default {
 
         // check if we're either in startMode or endMode
         // if we are, reset the start or end node here.
+
+        // We will also make sure a start/end node cannot be a wall.
         if (this.isPlacingStartNode){
           this.startNodeReference.isStart = false;
           node.isStart = true;
