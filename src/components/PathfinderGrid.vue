@@ -32,6 +32,21 @@
     <p>
       Allowed To Draw: {{ this.allowedToDraw }}
     </p>
+    <p>
+      Placing Start Node: {{ this.isPlacingStartNode }}
+    </p>
+    <p>
+      Placing End Node: {{ this.isPlacingEndNode }}
+    </p>
+    <p>
+      Is Mouse Down : {{ this.isMouseDown }}
+    </p>
+    <button @click="settingStartNode()">
+      Place Start Node
+    </button>
+    <button @click="settingEndNode()">
+      Place End Node
+    </button>
 </template>
 
 <script>
@@ -60,6 +75,8 @@ export default {
         isMouseDown: false,
         willFillWall: false,
         allowedToDraw: true,
+        isPlacingStartNode: false,
+        isPlacingEndNode: false,
       }
     },
     methods: {
@@ -77,6 +94,7 @@ export default {
           tempGrid.push(currentRow)
         }
         this.grid = tempGrid;
+        this.hasDrawnGrid = false;
       },
 
       createNode(row, col) {
@@ -124,6 +142,32 @@ export default {
       setMouseDown(rowIndex, colIndex) {
         const node = this.grid[rowIndex][colIndex];
 
+        // check if we're either in startMode or endMode
+        // if we are, reset the start or end node here.
+        if (this.isPlacingStartNode){
+          this.startNodeReference.isStart = false;
+          node.isStart = true;
+          this.startNodeRow = rowIndex;
+          this.startNodeCol = colIndex;
+
+          this.startNodeReference = node;
+
+          this.isPlacingStartNode = false;
+        }
+
+        if (this.isPlacingEndNode){
+          this.endNodeReference.isEnd = false;
+          node.isEnd = true;
+          this.endNodeRow = rowIndex;
+          this.endNodeCol = colIndex;
+
+          this.endNodeReference = node;
+
+          this.isPlacingEndNode = false;
+        }
+
+        if (node.isStart || node.isEnd) this.generateInitialGrid();
+
         if (!this.allowedToDraw || node.isStart || node.isEnd) return;
 
         this.isMouseDown = true;
@@ -144,6 +188,16 @@ export default {
       setMouseUp() {
         this.isMouseDown = false;
       },
+
+      settingStartNode(){
+        if (this.isPlacingEndNode) this.isPlacingEndNode = false;
+        this.isPlacingStartNode = true;
+      },
+
+      settingEndNode(){
+        if (this.isPlacingStartNode) this.isPlacingStartNode = true;
+        this.isPlacingEndNode = true;
+      }
     },
     mounted(){
       this.$nextTick(() => {
