@@ -8,6 +8,12 @@ export const dijkstra = (grid, startNode, endNode) => {
     sortNodesByDistance(unvisitedNodes);
     const closestNode = unvisitedNodes.shift();
 
+    if (closestNode.isWall) continue;
+
+    // if the closest distance is infinity it means the
+    // pathfinder is trapped and
+    if (closestNode.distance === Infinity) return visitedNodesInOrder;
+
     closestNode.isVisited = true;
     visitedNodesInOrder.push(closestNode);
     if (closestNode === endNode) return visitedNodesInOrder;
