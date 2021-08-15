@@ -29,9 +29,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  @use "../global_style/colors" as c;
   .node{
     border: 2px solid black;
     width: 20px; height: 20px;
+    background: #FFFFFF;
     /* Below prevents annoying dragging behaviours when drawing.*/
     -webkit-user-select: none;
     -khtml-user-select: none;

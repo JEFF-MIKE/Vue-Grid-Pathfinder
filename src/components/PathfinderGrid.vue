@@ -284,11 +284,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  @use "../global_style/colors" as c;
   #grid {
-    border: 5px solid green;
+    border: 5px solid c.$primary-color;
+    border-right: none;
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
+    justify-content: center;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
@@ -307,6 +309,12 @@ export default {
   .row {
     display: flex;
     flex-direction: row;
-    flex: 1 1 auto;
-  } 
+  }
+
+  @media screen and (max-width:600px){
+  
+    #grid {
+      align-items: center;
+    }
+  }
 </style>

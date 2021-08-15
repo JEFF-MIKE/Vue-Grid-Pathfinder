@@ -2,25 +2,25 @@
   <div class="data-panel-wrapper">
     <div class="panel-info-wrapper">
       <p class="panel-info">
-      Filling Wall: {{ this.willFillWall }}
+      Filling Style: {{ this.willFillWall ? "Wall" : "Path" }}
       </p>
       <p class="panel-info">
-      Allowed To Draw: {{ this.allowedToDraw }}
+      Allowed To Draw: {{ this.allowedToDraw ? "Yes" : "No" }}
       </p>
       <p class="panel-info">
-      Placing Start Node: {{ this.isPlacingStartNode }}
+      Placing Start Node: {{ this.isPlacingStartNode ? "Yes" : "No" }}
       </p>
       <p class="panel-info">
-      Placing End Node: {{ this.isPlacingEndNode }}
+      Placing End Node: {{ this.isPlacingEndNode ? "Yes" : "No" }}
       </p>
       <p class="panel-info">
-      Is Mouse Down : {{ this.isMouseDown }}
+      Drawing: {{ this.isMouseDown ? "Yes" : "No" }}
       </p>
       <p class="panel-info">
-      Shortest Path: {{ this.currentShortestDistance === Infinity ? "Doesn't exist" : this.currentShortestDistance }}
+      Shortest Path: {{ this.currentShortestDistance === Infinity ? "???" : this.currentShortestDistance }}
       </p>
       <p class="panel-info">
-      highlightedShortestDistance: {{ this.highlightedShortestDistance === Infinity ? "Doesn't Exist" : this.highlightedShortestDistance }}
+      highlight Distance: {{ this.highlightedShortestDistance === Infinity ? "???" : this.highlightedShortestDistance }}
       </p>
     </div>
     <div class="button-panel-wrapper">
@@ -34,7 +34,7 @@
         Clear Drawn Path
       </button>
       <button @click="$emit('run-dijkstra')">
-        Visualize Djikstra's Algorithm.
+        Visualize Djikstra's Algorithm
       </button>
     </div>
   </div>
@@ -56,8 +56,42 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .button-panel-wrapper, .panel-info-wrapper {
+  @use "../global_style/colors" as c;
+
+  .data-panel-wrapper {
     display: flex;
     flex-direction: column;
+    justify-content: space-evenly;
+    background: c.$primary-color;
+    width: 250px;
+  }
+
+  .button-panel-wrapper, .panel-info-wrapper {
+    height: 305px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+
+  .button-panel-wrapper{
+    background: c.$secondary-color;
+  }
+
+  p {
+    width: 200px;
+    margin: 8px 0;
+    text-align: start;
+    color: c.$primary-text-color;
+  }
+
+  button {
+    background: c.$button-color;
+    color: c.$button-font-color;
+    width: 200px;
+    padding: 8px 4px;
+    cursor: pointer;
+    border: none;
+    font-size: 13px;
   }
 </style>
