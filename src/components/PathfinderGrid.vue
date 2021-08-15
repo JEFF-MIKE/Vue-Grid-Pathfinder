@@ -1,65 +1,54 @@
-<template>
-  <button @click="runDijkstra()">
-    Visualize Djikstra's Algorithm.
-  </button>
-    <div 
-      id="grid"
-      @mouseleave="setMouseUp()">
-      <div
-        class="row"
-        :key="rowIndex" 
-        v-for="(row, rowIndex) in grid">
-          <Node
-            @mouse-down="setMouseDown(rowIndex, colIndex)"
-            @mouse-enter="mouseEnteredNode(rowIndex, colIndex)"
-            @mouse-up="setMouseUp()"
-            v-for="(node, colIndex) in row"
-            :key="(node.nodeId)"
-            :rowIndex="rowIndex"
-            :colIndex="colIndex"
-            :isStart="node.isStart"
-            :isEnd="node.isEnd"
-            :isVisited="node.isVisited"
-            :isDrawn="node.isDrawn"
-            :distance="node.distance"
-            :isWall="node.isWall"
-          />
-      </div>
+<template> 
+  <div 
+    id="grid"
+    @mouseleave="setMouseUp()">
+    <div
+      class="row"
+      :key="rowIndex" 
+      v-for="(row, rowIndex) in grid">
+        <Node
+          @mouse-down="setMouseDown(rowIndex, colIndex)"
+          @mouse-enter="mouseEnteredNode(rowIndex, colIndex)"
+          @mouse-up="setMouseUp()"
+          @mouse-leave="mouseHasLeftNode(rowIndex, colIndex)"
+          v-for="(node, colIndex) in row"
+          :key="(node.nodeId)"
+          :rowIndex="rowIndex"
+          :colIndex="colIndex"
+          :isStart="node.isStart"
+          :isEnd="node.isEnd"
+          :isVisited="node.isVisited"
+          :isDrawn="node.isDrawn"
+          :distance="node.distance"
+          :isWall="node.isWall"
+          :isBackTracked="node.isBackTracked"
+        />
     </div>
-    <p>
-      Drawing Wall: {{ this.willFillWall }}
-    </p>
-    <p>
-      Allowed To Draw: {{ this.allowedToDraw }}
-    </p>
-    <p>
-      Placing Start Node: {{ this.isPlacingStartNode }}
-    </p>
-    <p>
-      Placing End Node: {{ this.isPlacingEndNode }}
-    </p>
-    <p>
-      Is Mouse Down : {{ this.isMouseDown }}
-    </p>
-    <button @click="settingStartNode()">
-      Place Start Node
-    </button>
-    <button @click="settingEndNode()">
-      Place End Node
-    </button>
-    <button @click="resetDrawnPath()">
-      Clear Drawn Path
-    </button>
+  </div>
+  <DataPanel
+    @set-start-node="settingStartNode()"
+    @set-end-node="settingEndNode()"
+    @reset-drawn-graph="resetDrawnPath()"
+    @run-dijkstra="runDijkstra()"
+    :allowedToDraw="this.allowedToDraw"
+    :willFillWall="this.willFillWall"
+    :isPlacingStartNode="this.isPlacingStartNode"
+    :isPlacingEndNode="this.isPlacingEndNode"
+    :isMouseDown="this.isMouseDown"
+    :currentShortestDistance="this.currentShortestDistance"
+    :highlightedShortestDistance="this.highlightedShortestDistance"/>
 </template>
 
 <script>
 import Node from "./Node.vue"
+import DataPanel from "./DataPanel.vue"
 import { dijkstra } from "../algorithms/dijkstra";
 
 export default {
     name: "PathfinderGrid",
     components: {
-      Node
+      Node,
+      DataPanel,
     },
     data(){
       return {
@@ -80,6 +69,8 @@ export default {
         allowedToDraw: true,
         isPlacingStartNode: false,
         isPlacingEndNode: false,
+        currentShortestDistance: Infinity,
+        highlightedShortestDistance: Infinity,
       }
     },
     methods: {
@@ -90,9 +81,13 @@ export default {
           const currentRow = [];
           for (let col = 0; col < this.colCount; col++) {
             const currentNode = this.createNode(row, col, nodeId);
+
             nodeId++;
+
             if (currentNode.isStart) this.startNodeReference = currentNode
+
             if (currentNode.isEnd) this.endNodeReference = currentNode 
+
             currentRow.push(currentNode);
           }
           tempGrid.push(currentRow)
@@ -115,6 +110,7 @@ export default {
           nodeId,
         }
       },
+
       resetDrawnPath(includeWall = false){
         /*
         This method will go through an existing grid and change the following properties:
@@ -137,20 +133,27 @@ export default {
               distance: Infinity,
             }
             if (includeWall) newNode.isWall = false;
+
             this.grid[row][col] = newNode;
             // we actually remove the previous references with the new assignment,
             // so we need to re-assign it.
             if (newNode.isStart) this.startNodeReference = newNode;
+
             if (newNode.isEnd) this.endNodeReference = newNode;
           }
         }
         console.log(this.grid.length, this.grid[0].length);
+        this.currentShortestDistance = Infinity;
+
+        this.allowedToDraw = true;
+
+        this.hasDrawnAlgorithm = false;
       },
+
       runDijkstra(){
         if (this.hasDrawnAlgorithm) {
           // reset the grid
           this.resetDrawnPath();
-          this.hasDrawnAlgorithm = false;
         }
         const visitedNodesInOrder = dijkstra(this.grid.slice(), this.startNodeReference, this.endNodeReference);
         console.log(visitedNodesInOrder);
@@ -160,18 +163,13 @@ export default {
       drawDijkstra(orderedNodeArray){
         this.allowedToDraw = false;
         const amountOfNodes = orderedNodeArray.length;
+        setTimeout(() => {this.hasDrawnAlgorithm = true}, 10 * amountOfNodes);
         for (let i = 0; i < amountOfNodes; i++) {
           setTimeout(() => {
             orderedNodeArray[i].isDrawn = true;
-          }, i * 10);
-
-          if (i === amountOfNodes - 1){
-            setTimeout(() => {
-              this.allowedToDraw = true
-            }, i * 10);
-          } 
+          }, i * 10); 
         }
-        this.hasDrawnAlgorithm = true;
+        this.currentShortestDistance = this.endNodeReference.distance;
       },
 
       setMouseDown(rowIndex, colIndex) {
@@ -183,24 +181,34 @@ export default {
         // We will also make sure a start/end node cannot be a wall.
         if (this.isPlacingStartNode){
           this.startNodeReference.isStart = false;
+
           node.isStart = true;
+
           this.startNodeRow = rowIndex;
+
           this.startNodeCol = colIndex;
 
           this.startNodeReference = node;
 
           this.isPlacingStartNode = false;
+          
+          this.currentShortestDistance = Infinity;
         }
 
         if (this.isPlacingEndNode){
           this.endNodeReference.isEnd = false;
+
           node.isEnd = true;
+
           this.endNodeRow = rowIndex;
+
           this.endNodeCol = colIndex;
 
           this.endNodeReference = node;
 
           this.isPlacingEndNode = false;
+
+          this.currentShortestDistance = Infinity;
         }
 
         if (node.isStart || node.isEnd) this.generateInitialGrid();
@@ -216,8 +224,21 @@ export default {
 
       mouseEnteredNode(rowIndex, colIndex){
         const node = this.grid[rowIndex][colIndex];
-        if (!this.isMouseDown || node.isStart || node.isEnd) return;
 
+        // check if the node isVisited and if it is drawn. If so, backtrack and style.
+        if (this.hasDrawnAlgorithm && node.isDrawn) {
+          this.highlightedShortestDistance = node.distance;
+
+          let targetNode = node;
+
+          while (targetNode !== null) {
+            targetNode.isBackTracked = true;
+
+            targetNode = targetNode.previousNode;
+          }
+        }
+
+        if (!this.isMouseDown || node.isStart || node.isEnd || !this.allowedToDraw) return;
 
         node.isWall = this.willFillWall ? true : false; 
       },
@@ -228,13 +249,31 @@ export default {
 
       settingStartNode(){
         if (this.isPlacingEndNode) this.isPlacingEndNode = false;
+
         this.isPlacingStartNode = true;
       },
 
       settingEndNode(){
         if (this.isPlacingStartNode) this.isPlacingStartNode = true;
+
         this.isPlacingEndNode = true;
-      }
+      },
+
+      mouseHasLeftNode(rowIndex, colIndex){
+        // wipe the backtracking colors if they were set previously.
+        const node = this.grid[rowIndex][colIndex];
+
+        if (this.hasDrawnAlgorithm && node.isDrawn) {
+          this.highlightedShortestDistance = Infinity;
+          let targetNode = node;
+
+          while (targetNode !== null) {
+            targetNode.isBackTracked = false;
+
+            targetNode = targetNode.previousNode;
+          }
+        }
+      },
     },
     mounted(){
       this.$nextTick(() => {
@@ -247,7 +286,9 @@ export default {
 <style lang="scss" scoped>
   #grid {
     border: 5px solid green;
-    display: inline-block;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
@@ -266,5 +307,6 @@ export default {
   .row {
     display: flex;
     flex-direction: row;
+    flex: 1 1 auto;
   } 
 </style>

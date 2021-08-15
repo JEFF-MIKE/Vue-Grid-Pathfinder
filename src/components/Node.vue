@@ -4,8 +4,9 @@
     @mousedown="$emit('mouse-down', rowIndex, colIndex)"
     @mouseenter="$emit('mouse-enter', rowIndex, colIndex)"
     @mouseup="$emit('mouse-up')"
+    @mouseleave="$emit('mouse-leave', rowIndex, colIndex)"
     class="node"
-    :class="{startNode: isStart, endNode: isEnd, isDrawn: isDrawn, isWall: isWall}"
+    :class="{startNode: isStart, endNode: isEnd, isDrawn: isDrawn, isWall: isWall, isBackTracked: isBackTracked}"
   >
   </div>
 </template>
@@ -22,6 +23,7 @@ export default {
     isDrawn: Boolean,
     distance: Number,
     isWall: Boolean,
+    isBackTracked: Boolean,
   },
 }
 </script>
@@ -62,7 +64,26 @@ export default {
     border-color: orange;
   }
 
+  .isDrawn.isBackTracked {
+    background: yellow;
+  }
+
+  .startNode.isDrawn.isDrawn.isBackTracked {
+    border-color: green;
+  }
+
+  .endNode.isDrawn.isBackTracked {
+    border-color: red;
+  }
+
   .isWall{
     background: gray;;
+  }
+
+  @media screen and (max-width: 600px) {
+    .node {
+      width: 16px; height: 16px;
+      border: 1px solid black;
+    }
   }
 </style>
