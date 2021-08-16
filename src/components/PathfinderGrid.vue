@@ -185,6 +185,7 @@ export default {
       },
 
       setMouseDown(rowIndex, colIndex) {
+        if (!this.allowedToDraw) return;
         const node = this.grid[rowIndex][colIndex];
 
         // check if we're either in startMode or endMode
@@ -223,9 +224,10 @@ export default {
           this.currentShortestDistance = Infinity;
         }
 
-        if (node.isStart || node.isEnd) this.generateInitialGrid();
-
-        if (!this.allowedToDraw || node.isStart || node.isEnd) return;
+        if (node.isStart || node.isEnd) {
+          this.generateInitialGrid();
+          return;
+        }
 
         this.isMouseDown = true;
         
