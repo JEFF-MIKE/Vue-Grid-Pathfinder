@@ -32,6 +32,8 @@ export default {
   @media screen and (max-width:850px){
     #app {
       flex-direction: column;
+      background: c.$primary-color;
+      padding-top: 40px;
     }
   }
 </style>

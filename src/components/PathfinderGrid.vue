@@ -321,6 +321,13 @@ export default {
   .row {
     display: flex;
     flex-direction: row;
+    justify-content: center;
+  }
+
+  @media screen and (max-width:850px) {
+    #grid {
+      border: none;
+    }
   }
 
   @media screen and (max-width:600px){

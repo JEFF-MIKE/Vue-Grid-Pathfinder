@@ -130,4 +130,19 @@ export default {
       cursor: not-allowed;
     }
   }
+
+  @media screen and (max-width:850px){
+    .data-panel-wrapper {
+      flex-direction: row;
+      justify-content: space-evenly;
+      align-items: center;
+      width: 100%;
+      height: 300px
+    }
+
+    .button-panel-wrapper, .panel-info-wrapper {
+      height: 250px;
+      padding: 15px 20px;
+    }
+  }
 </style>
