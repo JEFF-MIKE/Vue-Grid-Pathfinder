@@ -48,6 +48,10 @@ export default {
     -o-user-drag: none;
     -ms-user-drag: none;
     user-drag: none;
+
+    &:hover{
+      border-color: c.$alternative-primary-text-color;
+    }
   }
 
   .isDrawn {
@@ -56,10 +60,18 @@ export default {
 
   .startNode {
     background: green;
+
+    &:hover{
+      border-color: #234F1E; // Mahogany
+    }
   }
 
   .endNode {
     background: red;
+
+    &:hover{
+      border-color: #900d09; // Mahogany
+    }
   }
 
   .startNode.isDrawn, .endNode.isDrawn{

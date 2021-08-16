@@ -20,21 +20,51 @@
       Shortest Path: {{ this.currentShortestDistance === Infinity ? "???" : this.currentShortestDistance }}
       </p>
       <p class="panel-info">
-      highlight Distance: {{ this.highlightedShortestDistance === Infinity ? "???" : this.highlightedShortestDistance }}
+      Highlighted Distance: {{ this.highlightedShortestDistance === Infinity ? "???" : this.highlightedShortestDistance }}
       </p>
     </div>
     <div class="button-panel-wrapper">
-      <button @click="$emit('set-start-node')">
+      <!-- 
+        Should Introduce VueX and transform below buttons into
+        a button component.
+      -->
+      <button 
+        @click="$emit('set-start-node')"
+        :class="{disabled: !this.allowedToDraw}"
+        :enabled="this.allowedToDraw"
+        >
         Place Start Node
       </button>
-      <button @click="$emit('set-end-node')">
+      <button 
+        @click="$emit('set-end-node')"
+        :class="{disabled: !this.allowedToDraw}"
+        :enabled="this.allowedToDraw"
+        >
         Place End Node
       </button>
-      <button @click="$emit('reset-drawn-graph')">
-        Clear Drawn Path
+      <button
+        @click="$emit('path-fill')"
+        :class="{disabled: !this.allowedToDraw}"
+        :enabled="this.allowedToDraw">
+        Fill With Path
+      </button>
+      <button
+        @click="$emit('wall-fill')"
+        :class="{disabled: !this.allowedToDraw}"
+        :enabled="this.allowedToDraw">
+        Fill With Wall
       </button>
       <button @click="$emit('run-dijkstra')">
-        Visualize Djikstra's Algorithm
+        <!-- make this a computed property... -->
+        {{ (this.hasDrawnAlgorithm)  ? "Re-run Algorithm" : ""}}
+        {{ (!this.hasDrawnAlgorithm && this.allowedToDraw) ? "Run Dijkstra's Algorithm" : "" }}
+        {{ (!this.hasDrawnAlgorithm && ! this.allowedToDraw) ? "Running..." : "" }}
+      </button>
+      <button 
+        @click="$emit('reset-drawn-graph')"
+        :class="{disabled: !this.hasDrawnAlgorithm}"
+        :enabled="this.hasDrawnAlgorithm">
+        Clear Drawn Path
       </button>
     </div>
   </div>
@@ -51,6 +81,7 @@ export default {
     isMouseDown: Boolean,
     currentShortestDistance: Number,
     highlightedShortestDistance: Number,
+    hasDrawnAlgorithm: Number,
   }
 }
 </script>
@@ -93,5 +124,10 @@ export default {
     cursor: pointer;
     border: none;
     font-size: 13px;
+
+    &.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   }
 </style>

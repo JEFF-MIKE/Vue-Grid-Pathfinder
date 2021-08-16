@@ -30,13 +30,16 @@
     @set-end-node="settingEndNode()"
     @reset-drawn-graph="resetDrawnPath()"
     @run-dijkstra="runDijkstra()"
+    @path-fill="fillGridMode(false)"
+    @wall-fill="fillGridMode()"
     :allowedToDraw="this.allowedToDraw"
     :willFillWall="this.willFillWall"
     :isPlacingStartNode="this.isPlacingStartNode"
     :isPlacingEndNode="this.isPlacingEndNode"
     :isMouseDown="this.isMouseDown"
     :currentShortestDistance="this.currentShortestDistance"
-    :highlightedShortestDistance="this.highlightedShortestDistance"/>
+    :highlightedShortestDistance="this.highlightedShortestDistance"
+    :hasDrawnAlgorithm="this.hasDrawnAlgorithm"/>
 </template>
 
 <script>
@@ -148,6 +151,15 @@ export default {
         this.allowedToDraw = true;
 
         this.hasDrawnAlgorithm = false;
+      },
+
+      fillGridMode(shouldFillWall = true){
+        for (let row = 0; row < this.rowCount; row++){
+          for (let col = 0; col < this.colCount; col++){
+            const node = this.grid[row][col];
+            if (!node.isStart && !node.isEnd) node.isWall = shouldFillWall;
+          }
+        }
       },
 
       runDijkstra(){
