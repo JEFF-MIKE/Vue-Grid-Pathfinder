@@ -34,6 +34,7 @@
     @run-dijkstra="runDijkstra()"
     @path-fill="fillGridMode(false)"
     @wall-fill="fillGridMode()"
+    @reset-weights="resetWeights()"
     :allowedToDraw="this.allowedToDraw"
     :willFillWall="this.willFillWall"
     :isPlacingStartNode="this.isPlacingStartNode"
@@ -122,7 +123,7 @@ export default {
         }
       },
 
-      resetDrawnPath(includeWall = false){
+      resetDrawnPath(includeWall = false, includeWeights = false){
         /*
         This method will go through an existing grid and change the following properties:
         isDrawn,
@@ -142,10 +143,13 @@ export default {
               isVisited: false,
               isBackTracked: false,
               distance: Infinity,
-              hasWeight: false,
-              weight: 1,
             }
             if (includeWall) newNode.isWall = false;
+
+            if (includeWeights) {
+              newNode.weight = 1;
+              newNode.hasWeight = false;
+            }
 
             this.grid[row][col] = newNode;
             // we actually remove the previous references with the new assignment,
@@ -170,7 +174,11 @@ export default {
 
             if (!node.isStart && !node.isEnd) node.isWall = shouldFillWall;
 
-            if (shouldFillWall) node.distance = Infinity;
+            if (node.isWall) {
+              // Make sure wall doesn't have a weight
+              node.hasWeight = false;
+              node.weight = 1;
+            }
           }
         }
       },
@@ -339,6 +347,7 @@ export default {
         for (let row = 0; row < this.rowCount; row++) {
           for (let col=0; col < this.colCount; col++) {
             this.grid[row][col].weight = 1;
+            this.grid[row][col].hasWeight = false;
           }
         }
       },

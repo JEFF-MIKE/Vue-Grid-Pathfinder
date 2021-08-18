@@ -96,6 +96,10 @@ export default {
 
   .isDrawn.isBackTracked {
     background: yellow;
+
+    p {
+      color: black;
+    }
   }
 
   .startNode.isDrawn.isDrawn.isBackTracked {

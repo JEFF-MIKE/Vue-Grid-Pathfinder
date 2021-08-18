@@ -57,6 +57,13 @@
         >
         {{ this.isPlacingWeights ? "Place Walls" : "Place Weights" }}
       </button>
+      <button 
+        @click="$emit('reset-weights')"
+        :class="{disabled: !this.allowedToDraw}"
+        :enabled="this.allowedToDraw"
+        >
+        Reset Weights
+      </button>
       <button
         @click="$emit('path-fill')"
         :class="{disabled: !this.allowedToDraw}"
@@ -124,6 +131,20 @@ export default {
 
   .button-panel-wrapper{
     background: c.$secondary-color;
+  }
+
+  .panel-div {
+    display: flex;
+    width: 200px;
+    
+
+    p {
+      width: 80%;
+    }
+
+    .number-input {
+      width: 20%;
+    }
   }
 
   p {
