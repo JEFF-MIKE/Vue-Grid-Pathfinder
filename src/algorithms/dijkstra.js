@@ -11,7 +11,7 @@ export const dijkstra = (grid, startNode, endNode) => {
     if (closestNode.isWall) continue;
 
     // if the closest distance is infinity it means the
-    // pathfinder is trapped and
+    // pathfinder is trapped and cannot continue further.
     if (closestNode.distance === Infinity) return visitedNodesInOrder;
 
     closestNode.isVisited = true;
@@ -19,6 +19,9 @@ export const dijkstra = (grid, startNode, endNode) => {
     if (closestNode === endNode) return visitedNodesInOrder;
     updateUnvisitedNeighbors(closestNode, grid);
   }
+
+  // Return here for silly edgecases where grid gets filled
+  // up and somehow doesn't return the shortest path.
 }
 
 const getGridNodes = (grid) => { return grid.flat() }
@@ -31,8 +34,24 @@ const updateUnvisitedNeighbors = (node, grid) => {
   const neighbors = getUnvisitedNeighbors(node, grid);
 
   for (const neighbor of neighbors) {
-    neighbor.distance = node.distance + 1;
+    // We need to check here to see if the new distance is
+    // less than the previous distance. If it is, update it and
+    // the previous node reference, otherwise continue.
+
+    if (neighbor.distance !== Infinity){
+      // There is a known distance, we need to check if it's shorter
+      // than the current distance. If it is, update it.
+      const newDistance = node.distance + neighbor.weight;
+      if (neighbor.distance > newDistance) {
+        neighbor.distance = newDistance;
+        neighbor.previousNode = node;
+      }
+      continue;
+    }
+
+    neighbor.distance = node.distance + neighbor.weight;
     neighbor.previousNode = node;
+
   }
 }
 

@@ -8,6 +8,9 @@
     class="node"
     :class="{startNode: isStart, endNode: isEnd, isDrawn: isDrawn, isWall: isWall, isBackTracked: isBackTracked}"
   >
+    <p v-if="this.hasWeight">
+      {{ this.weight }}
+    </p>
   </div>
 </template>
 
@@ -24,6 +27,8 @@ export default {
     distance: Number,
     isWall: Boolean,
     isBackTracked: Boolean,
+    hasWeight: Boolean,
+    weight: Number,
   },
 }
 </script>
@@ -34,6 +39,9 @@ export default {
     border: 2px solid black;
     width: 20px; height: 20px;
     background: #FFFFFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     /* Below prevents annoying dragging behaviours when drawing.*/
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -52,10 +60,18 @@ export default {
     &:hover{
       border-color: c.$alternative-primary-text-color;
     }
+
+    p {
+      font-size: 12px;
+    }
   }
 
   .isDrawn {
     background: blue;
+
+    p {
+      color: white;
+    }
   }
 
   .startNode {

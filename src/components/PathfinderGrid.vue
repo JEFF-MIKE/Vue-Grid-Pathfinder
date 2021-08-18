@@ -22,12 +22,14 @@
           :distance="node.distance"
           :isWall="node.isWall"
           :isBackTracked="node.isBackTracked"
-        />
+          :hasWeight="node.hasWeight"
+          :weight="node.weight"/>
     </div>
   </div>
   <DataPanel
     @set-start-node="settingStartNode()"
     @set-end-node="settingEndNode()"
+    @set-weight-nodes="settingWeightNodes()"
     @reset-drawn-graph="resetDrawnPath()"
     @run-dijkstra="runDijkstra()"
     @path-fill="fillGridMode(false)"
@@ -39,7 +41,9 @@
     :isMouseDown="this.isMouseDown"
     :currentShortestDistance="this.currentShortestDistance"
     :highlightedShortestDistance="this.highlightedShortestDistance"
-    :hasDrawnAlgorithm="this.hasDrawnAlgorithm"/>
+    :hasDrawnAlgorithm="this.hasDrawnAlgorithm"
+    :isPlacingWeights="this.isPlacingWeights"
+    v-model:weight="this.weightAmount"/>
 </template>
 
 <script>
@@ -56,6 +60,7 @@ export default {
     data(){
       return {
         grid: [],
+        weightAmount: 1,
         rowCount: 25,
         colCount: 25,
         startNodeRow: 10,
@@ -72,6 +77,7 @@ export default {
         allowedToDraw: true,
         isPlacingStartNode: false,
         isPlacingEndNode: false,
+        isPlacingWeights: false,
         currentShortestDistance: Infinity,
         highlightedShortestDistance: Infinity,
       }
@@ -105,6 +111,8 @@ export default {
           isStart: row === this.startNodeRow && col == this.startNodeCol,
           isEnd: row === this.endNodeRow && col === this.endNodeCol,
           distance: Infinity,
+          hasWeight: false,
+          weight: 1,
           isVisited: false,
           isWall: false,
           previousNode: null,
@@ -134,6 +142,8 @@ export default {
               isVisited: false,
               isBackTracked: false,
               distance: Infinity,
+              hasWeight: false,
+              weight: 1,
             }
             if (includeWall) newNode.isWall = false;
 
@@ -157,7 +167,10 @@ export default {
         for (let row = 0; row < this.rowCount; row++){
           for (let col = 0; col < this.colCount; col++){
             const node = this.grid[row][col];
+
             if (!node.isStart && !node.isEnd) node.isWall = shouldFillWall;
+
+            if (shouldFillWall) node.distance = Infinity;
           }
         }
       },
@@ -167,6 +180,14 @@ export default {
           // reset the grid
           this.resetDrawnPath();
         }
+
+        // Make sure the user can't place start or end nodes here.
+        this.isPlacingStartNode = false;
+
+        this.isPlacingEndNode = false;
+
+        this.isPlacingWeights = false;
+
         const visitedNodesInOrder = dijkstra(this.grid.slice(), this.startNodeReference, this.endNodeReference);
         console.log(visitedNodesInOrder);
         this.drawDijkstra(visitedNodesInOrder);
@@ -225,15 +246,30 @@ export default {
         }
 
         if (node.isStart || node.isEnd) {
+          // wipe the grid everytime we place a start
+          // or end node.
           this.generateInitialGrid();
           return;
         }
 
         this.isMouseDown = true;
-        
+
+        if (this.isPlacingWeights){
+          // Just set all negative numbers to 1 for now.
+          node.weight = (this.weightAmount > 1 ? this.weightAmount : 1);
+          node.hasWeight = (node.weight === 1 ? false : true);
+          node.isWall = false;
+          return;
+        }
+
         this.willFillWall = !node.isWall ? true : false;
 
         node.isWall = this.willFillWall ? true : false;
+
+        if (node.isWall){
+          node.weight = 1;
+          node.hasWeight = false;
+        }
       },
 
       mouseEnteredNode(rowIndex, colIndex){
@@ -254,23 +290,57 @@ export default {
 
         if (!this.isMouseDown || node.isStart || node.isEnd || !this.allowedToDraw) return;
 
-        node.isWall = this.willFillWall ? true : false; 
+        if (this.isPlacingWeights) {
+          node.weight = (this.weightAmount > 1 ? this.weightAmount : 1);
+          node.hasWeight = (node.weight === 1 ? false : true);
+          node.isWall = false;
+          return;
+        }
+
+        node.isWall = this.willFillWall ? true : false;
+
+        if (node.isWall) {
+          node.weight = 1;
+          node.hasWeight = false;
+        }
       },
 
       setMouseUp() {
         this.isMouseDown = false;
       },
-
+      /* 
+        Could set isPlacing<x> as computed here.
+      */
       settingStartNode(){
         if (this.isPlacingEndNode) this.isPlacingEndNode = false;
 
-        this.isPlacingStartNode = true;
+        if (this.isPlacingWeights) this.isPlacingWeights = false;
+
+        this.isPlacingStartNode = !this.isPlacingStartNode;
       },
 
       settingEndNode(){
-        if (this.isPlacingStartNode) this.isPlacingStartNode = true;
+        if (this.isPlacingStartNode) this.isPlacingStartNode = false;
 
-        this.isPlacingEndNode = true;
+        if (this.isPlacingWeights) this.isPlacingWeights = false;
+
+        this.isPlacingEndNode = !this.isPlacingEndNode;
+      },
+
+      settingWeightNodes(){
+        if (this.isPlacingStartNode) this.isPlacingStartNode = false;
+
+        if (this.isPlacingEndNode) this.isPlacingEndNode = false;
+
+        this.isPlacingWeights = !this.isPlacingWeights;
+      },
+
+      resetWeights(){
+        for (let row = 0; row < this.rowCount; row++) {
+          for (let col=0; col < this.colCount; col++) {
+            this.grid[row][col].weight = 1;
+          }
+        }
       },
 
       mouseHasLeftNode(rowIndex, colIndex){

@@ -22,6 +22,14 @@
       <p class="panel-info">
       Highlighted Distance: {{ this.highlightedShortestDistance === Infinity ? "???" : this.highlightedShortestDistance }}
       </p>
+      <div class="panel-div">
+        <p class="panel-info">Weight Amount:</p>
+        <input
+          class="number-input"
+          type="number" 
+          :value="weight"
+          @input="$emit('update:weight', parseInt($event.target.value))"/>
+      </div>
     </div>
     <div class="button-panel-wrapper">
       <!-- 
@@ -33,14 +41,21 @@
         :class="{disabled: !this.allowedToDraw}"
         :enabled="this.allowedToDraw"
         >
-        Place Start Node
+        {{ this.isPlacingStartNode ? "Cancel Placing Start Node" : "Place Start Node" }}
       </button>
       <button 
         @click="$emit('set-end-node')"
         :class="{disabled: !this.allowedToDraw}"
         :enabled="this.allowedToDraw"
         >
-        Place End Node
+        {{ this.isPlacingEndNode ? "Cancel Placing End Node" : "Place End Node" }}
+      </button>
+      <button 
+        @click="$emit('set-weight-nodes')"
+        :class="{disabled: !this.allowedToDraw}"
+        :enabled="this.allowedToDraw"
+        >
+        {{ this.isPlacingWeights ? "Place Walls" : "Place Weights" }}
       </button>
       <button
         @click="$emit('path-fill')"
@@ -78,10 +93,12 @@ export default {
     willFillWall: Boolean,
     isPlacingStartNode: Boolean,
     isPlacingEndNode: Boolean,
+    isPlacingWeights: Boolean,
     isMouseDown: Boolean,
     currentShortestDistance: Number,
     highlightedShortestDistance: Number,
     hasDrawnAlgorithm: Number,
+    weight: Number,
   }
 }
 </script>
