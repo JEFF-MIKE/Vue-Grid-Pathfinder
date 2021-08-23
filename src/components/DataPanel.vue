@@ -1,33 +1,30 @@
 <template>
   <div class="data-panel-wrapper">
     <div class="panel-info-wrapper">
-      <p class="panel-info">
-      Filling Style: {{ this.willFillWall ? "Wall" : "Path" }}
+      <p 
+        class="panel-info"
+        :class="{disabled: !this.allowedToDraw}"
+        >
+      Placing: {{ this.drawMode }}
       </p>
       <p class="panel-info">
-      Allowed To Draw: {{ this.allowedToDraw ? "Yes" : "No" }}
-      </p>
-      <p class="panel-info">
-      Placing Start Node: {{ this.isPlacingStartNode ? "Yes" : "No" }}
-      </p>
-      <p class="panel-info">
-      Placing End Node: {{ this.isPlacingEndNode ? "Yes" : "No" }}
-      </p>
-      <p class="panel-info">
-      Drawing: {{ this.isMouseDown ? "Yes" : "No" }}
+      {{ this.allowedToDraw ? "Currently Allowed To Draw" : "Not Allowed To Draw!" }}
       </p>
       <p class="panel-info">
       Shortest Path: {{ this.currentShortestDistance === Infinity ? "???" : this.currentShortestDistance }}
       </p>
       <p class="panel-info">
-      Highlighted Distance: {{ this.highlightedShortestDistance === Infinity ? "???" : this.highlightedShortestDistance }}
+      Highlighted Distance: {{ this.highlightedShortestDistance === Infinity ? "N/A" : this.highlightedShortestDistance }}
       </p>
-      <div class="panel-div">
+      <div 
+        class="panel-div"
+        :class="{disabled: !this.allowedToDraw}">
         <p class="panel-info">Weight Amount:</p>
         <input
           class="number-input"
           type="number" 
           :value="weight"
+          :disabled="!this.allowedToDraw"
           @input="$emit('update:weight', parseInt($event.target.value))"/>
       </div>
     </div>
@@ -39,41 +36,41 @@
       <button 
         @click="$emit('set-start-node')"
         :class="{disabled: !this.allowedToDraw}"
-        :enabled="this.allowedToDraw"
+        :disabled="!this.allowedToDraw"
         >
-        {{ this.isPlacingStartNode ? "Cancel Placing Start Node" : "Place Start Node" }}
+        {{ this.drawMode === "Start Node" ? "Cancel Placing Start Node" : "Place Start Node" }}
       </button>
       <button 
         @click="$emit('set-end-node')"
         :class="{disabled: !this.allowedToDraw}"
-        :enabled="this.allowedToDraw"
+        :disabled="!this.allowedToDraw"
         >
-        {{ this.isPlacingEndNode ? "Cancel Placing End Node" : "Place End Node" }}
+        {{ this.drawMode ==="End Node" ? "Cancel Placing End Node" : "Place End Node" }}
       </button>
       <button 
         @click="$emit('set-weight-nodes')"
         :class="{disabled: !this.allowedToDraw}"
-        :enabled="this.allowedToDraw"
+        :disabled="!this.allowedToDraw"
         >
-        {{ this.isPlacingWeights ? "Place Walls" : "Place Weights" }}
+        {{ this.drawMode === "Weights" ? "Place Walls" : "Place Weights" }}
       </button>
       <button 
         @click="$emit('reset-weights')"
         :class="{disabled: !this.allowedToDraw}"
-        :enabled="this.allowedToDraw"
+        :disabled="!this.allowedToDraw"
         >
         Reset Weights
       </button>
       <button
         @click="$emit('path-fill')"
         :class="{disabled: !this.allowedToDraw}"
-        :enabled="this.allowedToDraw">
+        :disabled="!this.allowedToDraw">
         Fill With Path
       </button>
       <button
         @click="$emit('wall-fill')"
         :class="{disabled: !this.allowedToDraw}"
-        :enabled="this.allowedToDraw">
+        :disabled="!this.allowedToDraw">
         Fill With Wall
       </button>
       <button @click="$emit('run-dijkstra')">
@@ -85,7 +82,7 @@
       <button 
         @click="$emit('reset-drawn-graph')"
         :class="{disabled: !this.hasDrawnAlgorithm}"
-        :enabled="this.hasDrawnAlgorithm">
+        :disabled="!this.hasDrawnAlgorithm">
         Clear Drawn Path
       </button>
     </div>
@@ -97,15 +94,12 @@ export default {
   name: 'DataPanel',
   props: {
     allowedToDraw: Boolean,
-    willFillWall: Boolean,
-    isPlacingStartNode: Boolean,
-    isPlacingEndNode: Boolean,
-    isPlacingWeights: Boolean,
     isMouseDown: Boolean,
     currentShortestDistance: Number,
     highlightedShortestDistance: Number,
-    hasDrawnAlgorithm: Number,
+    hasDrawnAlgorithm: Boolean,
     weight: Number,
+    drawMode: String,
   }
 }
 </script>
@@ -169,6 +163,11 @@ export default {
     }
   }
 
+  .disabled {
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+
   @media screen and (max-width:850px){
     .data-panel-wrapper {
       flex-direction: row;
@@ -181,6 +180,13 @@ export default {
     .button-panel-wrapper, .panel-info-wrapper {
       height: 250px;
       padding: 15px 20px;
+    }
+  }
+
+  @media screen and (max-width: 600px){
+    button, .panel-info, .panel-div{
+      font-size: 10px;
+      width: 150px;
     }
   }
 </style>

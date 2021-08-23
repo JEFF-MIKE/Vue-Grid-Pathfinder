@@ -36,14 +36,11 @@
     @wall-fill="fillGridMode()"
     @reset-weights="resetWeights()"
     :allowedToDraw="this.allowedToDraw"
-    :willFillWall="this.willFillWall"
-    :isPlacingStartNode="this.isPlacingStartNode"
-    :isPlacingEndNode="this.isPlacingEndNode"
     :isMouseDown="this.isMouseDown"
+    :drawMode="this.drawMode"
     :currentShortestDistance="this.currentShortestDistance"
     :highlightedShortestDistance="this.highlightedShortestDistance"
     :hasDrawnAlgorithm="this.hasDrawnAlgorithm"
-    :isPlacingWeights="this.isPlacingWeights"
     v-model:weight="this.weightAmount"/>
 </template>
 
@@ -61,7 +58,7 @@ export default {
     data(){
       return {
         grid: [],
-        weightAmount: 1,
+        weightAmount: 2,
         rowCount: 25,
         colCount: 25,
         startNodeRow: 10,
@@ -159,7 +156,6 @@ export default {
             if (newNode.isEnd) this.endNodeReference = newNode;
           }
         }
-        console.log(this.grid.length, this.grid[0].length);
         this.currentShortestDistance = Infinity;
 
         this.allowedToDraw = true;
@@ -168,6 +164,7 @@ export default {
       },
 
       fillGridMode(shouldFillWall = true){
+        if (!this.allowedToDraw) return;
         for (let row = 0; row < this.rowCount; row++){
           for (let col = 0; col < this.colCount; col++){
             const node = this.grid[row][col];
@@ -197,7 +194,6 @@ export default {
         this.isPlacingWeights = false;
 
         const visitedNodesInOrder = dijkstra(this.grid.slice(), this.startNodeReference, this.endNodeReference);
-        console.log(visitedNodesInOrder);
         this.drawDijkstra(visitedNodesInOrder);
       },
 
@@ -320,6 +316,8 @@ export default {
         Could set isPlacing<x> as computed here.
       */
       settingStartNode(){
+        if (!this.allowedToDraw) return;
+
         if (this.isPlacingEndNode) this.isPlacingEndNode = false;
 
         if (this.isPlacingWeights) this.isPlacingWeights = false;
@@ -328,6 +326,8 @@ export default {
       },
 
       settingEndNode(){
+        if (!this.allowedToDraw) return;
+
         if (this.isPlacingStartNode) this.isPlacingStartNode = false;
 
         if (this.isPlacingWeights) this.isPlacingWeights = false;
@@ -336,6 +336,8 @@ export default {
       },
 
       settingWeightNodes(){
+        if (!this.allowedToDraw) return;
+
         if (this.isPlacingStartNode) this.isPlacingStartNode = false;
 
         if (this.isPlacingEndNode) this.isPlacingEndNode = false;
@@ -366,6 +368,19 @@ export default {
             targetNode = targetNode.previousNode;
           }
         }
+      },
+    },
+    computed: {
+      drawMode() {
+        // Will tell our Datapanel what we're currently drawing.
+        if (this.isPlacingStartNode) return "Start Node";
+
+        if (this.isPlacingEndNode) return "End Node";
+
+        if (this.isPlacingWeights) return "Weights"
+
+        // Walls are default for now.
+        return "Walls";
       },
     },
     mounted(){
