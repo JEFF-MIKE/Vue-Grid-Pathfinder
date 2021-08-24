@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
 import ButtonPanel from './ButtonPanel.vue';
 import InfoPanel from './InfoPanel.vue';
 
