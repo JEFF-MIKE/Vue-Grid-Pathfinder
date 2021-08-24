@@ -48,6 +48,7 @@
 import Node from "./Node.vue"
 import DataPanel from "./DataPanel.vue"
 import { dijkstra } from "../algorithms/dijkstra";
+import { mapState } from "vuex";
 
 export default {
     name: "PathfinderGrid",
@@ -71,11 +72,7 @@ export default {
         endNodeReference: null,
         hasDrawnAlgorithm: false,
         isMouseDown: false,
-        willFillWall: false,
         allowedToDraw: true,
-        isPlacingStartNode: false,
-        isPlacingEndNode: false,
-        isPlacingWeights: false,
         currentShortestDistance: Infinity,
         highlightedShortestDistance: Infinity,
       }
@@ -187,11 +184,11 @@ export default {
         }
 
         // Make sure the user can't place start or end nodes here.
-        this.isPlacingStartNode = false;
+        this.$store.commit('setIsPlacingStartNode', false);
 
-        this.isPlacingEndNode = false;
+        this.$store.commit('setIsPlacingEndNode', false);
 
-        this.isPlacingWeights = false;
+        this.$store.commit('setIsPlacingWeights', false);
 
         const visitedNodesInOrder = dijkstra(this.grid.slice(), this.startNodeReference, this.endNodeReference);
         this.drawDijkstra(visitedNodesInOrder);
@@ -228,7 +225,7 @@ export default {
 
           this.startNodeReference = node;
 
-          this.isPlacingStartNode = false;
+          this.$store.commit('setIsPlacingStartNode', false);
           
           this.currentShortestDistance = Infinity;
         }
@@ -244,7 +241,7 @@ export default {
 
           this.endNodeReference = node;
 
-          this.isPlacingEndNode = false;
+          this.$store.commit('setIsPlacingEndNode', false);
 
           this.currentShortestDistance = Infinity;
         }
@@ -266,9 +263,10 @@ export default {
           return;
         }
 
-        this.willFillWall = !node.isWall ? true : false;
+        const willFillWall = !node.isWall ? true : false;
+        this.$store.commit('setShouldFillWall', willFillWall);
 
-        node.isWall = this.willFillWall ? true : false;
+        node.isWall = willFillWall;
 
         if (node.isWall){
           node.weight = 1;
@@ -301,7 +299,7 @@ export default {
           return;
         }
 
-        node.isWall = this.willFillWall ? true : false;
+        node.isWall = this.shouldFillWall ? true : false;
 
         if (node.isWall) {
           node.weight = 1;
@@ -318,31 +316,31 @@ export default {
       settingStartNode(){
         if (!this.allowedToDraw) return;
 
-        if (this.isPlacingEndNode) this.isPlacingEndNode = false;
+        if (this.isPlacingEndNode) this.$store.commit("setIsPlacingEndNode", false);
 
-        if (this.isPlacingWeights) this.isPlacingWeights = false;
+        if (this.isPlacingWeights) this.$store.commit("setIsPlacingWeights", false);
 
-        this.isPlacingStartNode = !this.isPlacingStartNode;
+        this.$store.commit("setIsPlacingStartNode", !this.$store.state.isPlacingStartNode);
       },
 
       settingEndNode(){
         if (!this.allowedToDraw) return;
 
-        if (this.isPlacingStartNode) this.isPlacingStartNode = false;
+        if (this.isPlacingStartNode) this.$store.commit("setIsPlacingStartNode", false);
 
-        if (this.isPlacingWeights) this.isPlacingWeights = false;
+        if (this.isPlacingWeights) this.$store.commit("setIsPlacingWeights", false);
 
-        this.isPlacingEndNode = !this.isPlacingEndNode;
+        this.$store.commit("setIsPlacingEndNode", !this.isPlacingEndNode);
       },
 
       settingWeightNodes(){
         if (!this.allowedToDraw) return;
 
-        if (this.isPlacingStartNode) this.isPlacingStartNode = false;
+        if (this.isPlacingStartNode) this.$store.commit("setIsPlacingStartNode", false);
 
-        if (this.isPlacingEndNode) this.isPlacingEndNode = false;
+        if (this.isPlacingEndNode) this.$store.commit("setIsPlacingEndNode", false);
 
-        this.isPlacingWeights = !this.isPlacingWeights;
+        this.$store.commit("setIsPlacingWeights", !this.isPlacingWeights);
       },
 
       resetWeights(){
@@ -371,17 +369,12 @@ export default {
       },
     },
     computed: {
-      drawMode() {
-        // Will tell our Datapanel what we're currently drawing.
-        if (this.isPlacingStartNode) return "Start Node";
-
-        if (this.isPlacingEndNode) return "End Node";
-
-        if (this.isPlacingWeights) return "Weights"
-
-        // Walls are default for now.
-        return "Walls";
-      },
+      ...mapState([
+          'isPlacingStartNode',
+          'isPlacingEndNode',
+          'isPlacingWeights',
+          'shouldFillWall',
+      ]),
     },
     mounted(){
       this.$nextTick(() => {

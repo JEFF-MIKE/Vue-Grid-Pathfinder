@@ -5,7 +5,7 @@
         class="panel-info"
         :class="{disabled: !this.allowedToDraw}"
         >
-      Placing: {{ this.drawMode }}
+      Placing: {{ this.drawingMode }}
       </p>
       <p class="panel-info">
       {{ this.allowedToDraw ? "Currently Allowed To Draw" : "Not Allowed To Draw!" }}
@@ -38,21 +38,21 @@
         :class="{disabled: !this.allowedToDraw}"
         :disabled="!this.allowedToDraw"
         >
-        {{ this.drawMode === "Start Node" ? "Cancel Placing Start Node" : "Place Start Node" }}
+        {{ this.drawingMode === "Start Node" ? "Cancel Placing Start Node" : "Place Start Node" }}
       </button>
       <button 
         @click="$emit('set-end-node')"
         :class="{disabled: !this.allowedToDraw}"
         :disabled="!this.allowedToDraw"
         >
-        {{ this.drawMode ==="End Node" ? "Cancel Placing End Node" : "Place End Node" }}
+        {{ this.drawingMode ==="End Node" ? "Cancel Placing End Node" : "Place End Node" }}
       </button>
       <button 
         @click="$emit('set-weight-nodes')"
         :class="{disabled: !this.allowedToDraw}"
         :disabled="!this.allowedToDraw"
         >
-        {{ this.drawMode === "Weights" ? "Place Walls" : "Place Weights" }}
+        {{ this.drawingMode === "Weights" ? "Place Walls" : "Place Weights" }}
       </button>
       <button 
         @click="$emit('reset-weights')"
@@ -90,6 +90,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 export default {
   name: 'DataPanel',
   props: {
@@ -99,7 +100,9 @@ export default {
     highlightedShortestDistance: Number,
     hasDrawnAlgorithm: Boolean,
     weight: Number,
-    drawMode: String,
+  },
+  computed: {
+    ...mapGetters(['drawingMode']),
   }
 }
 </script>
