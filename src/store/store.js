@@ -6,6 +6,8 @@ const store = createStore({
         isPlacingEndNode: false,
         isPlacingWeights: false,
         shouldFillWall: false,
+        allowedToDraw: true,
+        hasDrawnAlgorithm: false,
     },
     mutations: {
         setIsPlacingStartNode(state, placingStartNodeBoolean){
@@ -22,6 +24,14 @@ const store = createStore({
 
         setShouldFillWall(state, shouldFillWallBoolean){
             state.shouldFillWall = shouldFillWallBoolean;
+        },
+
+        setAllowedToDraw(state, allowedToDrawBoolean){
+            state.allowedToDraw = allowedToDrawBoolean;
+        },
+        
+        setHasDrawnAlgorithm(state, hasDrawnAlgorithm){
+            state.hasDrawnAlgorithm = hasDrawnAlgorithm;
         }
     },
 
@@ -34,7 +44,7 @@ const store = createStore({
             if (state.isPlacingWeights) return "Weight(s)";
 
             return "Walls";
-        }
+        },
     }
 });
 

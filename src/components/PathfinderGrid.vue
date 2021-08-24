@@ -27,20 +27,6 @@
     </div>
   </div>
   <DataPanel
-    @set-start-node="settingStartNode()"
-    @set-end-node="settingEndNode()"
-    @set-weight-nodes="settingWeightNodes()"
-    @reset-drawn-graph="resetDrawnPath()"
-    @run-dijkstra="runDijkstra()"
-    @path-fill="fillGridMode(false)"
-    @wall-fill="fillGridMode()"
-    @reset-weights="resetWeights()"
-    :allowedToDraw="this.allowedToDraw"
-    :isMouseDown="this.isMouseDown"
-    :drawMode="this.drawMode"
-    :currentShortestDistance="this.currentShortestDistance"
-    :highlightedShortestDistance="this.highlightedShortestDistance"
-    :hasDrawnAlgorithm="this.hasDrawnAlgorithm"
     v-model:weight="this.weightAmount"/>
 </template>
 
@@ -72,7 +58,6 @@ export default {
         endNodeReference: null,
         hasDrawnAlgorithm: false,
         isMouseDown: false,
-        allowedToDraw: true,
         currentShortestDistance: Infinity,
         highlightedShortestDistance: Infinity,
       }
@@ -155,9 +140,10 @@ export default {
         }
         this.currentShortestDistance = Infinity;
 
-        this.allowedToDraw = true;
+        this.$store.commit("setAllowedToDraw", true);
 
         this.hasDrawnAlgorithm = false;
+
       },
 
       fillGridMode(shouldFillWall = true){
@@ -195,7 +181,7 @@ export default {
       },
 
       drawDijkstra(orderedNodeArray){
-        this.allowedToDraw = false;
+        this.$store.commit("setAllowedToDraw", false);
         const amountOfNodes = orderedNodeArray.length;
         setTimeout(() => {this.hasDrawnAlgorithm = true}, 10 * amountOfNodes);
         for (let i = 0; i < amountOfNodes; i++) {
@@ -374,12 +360,31 @@ export default {
           'isPlacingEndNode',
           'isPlacingWeights',
           'shouldFillWall',
+          'allowedToDraw',
       ]),
     },
     mounted(){
       this.$nextTick(() => {
         this.generateInitialGrid();
       });
+
+      // button events
+
+      this.emitter.on("set-start-node", () => this.settingStartNode());
+
+      this.emitter.on("set-end-node", () => this.settingEndNode());
+
+      this.emitter.on("set-weight-nodes", () => this.settingWeightNodes());
+
+      this.emitter.on("reset-drawn-graph", () => this.resetDrawnPath());
+
+      this.emitter.on("run-dijkstra", () => this.runDijkstra());
+
+      this.emitter.on("path-fill", () => this.fillGridMode(false));
+
+      this.emitter.on("wall-fill", () => this.fillGridMode());
+
+      this.emitter.on("reset-weights", () => this.resetWeights());
     },
 }
 </script>
