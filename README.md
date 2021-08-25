@@ -16,11 +16,11 @@ Currently, the application can do the following:
     + When completed, you can hover over any node to see the shortest distance from the start node to the highlighted visited node.
 
 Future additions/changes I will make include:
-+ Improve the UI over time / Make it easier to interact with.
-+ A logger that describes in English what actions are taking place.
-+ Break down certain components even further (this will mean introducing VueX).
-+ Add other pathfinding algorithms.
-+ Some form of a mobile view / decent mobile interaction.
+- [ ] Improve the UI over time / Make it easier to interact with.
+- [ ] A logger that describes in English what actions are taking place.
+- [x] Break down certain components even further (VueX is in program).
+- [ ] Add other pathfinding algorithms.
+- [ ] Some form of a mobile view / decent mobile interaction.
 
 Possible future additions:
 + A Maze generator, which will create a set of walls and paths with randomized start nodes and end nodes.

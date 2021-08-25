@@ -8,6 +8,9 @@ const store = createStore({
         shouldFillWall: false,
         allowedToDraw: true,
         hasDrawnAlgorithm: false,
+        weightAmount: 2,
+        currentShortestDistance: Infinity,
+        highlightedDistance: Infinity,
     },
     mutations: {
         setIsPlacingStartNode(state, placingStartNodeBoolean){
@@ -32,6 +35,18 @@ const store = createStore({
         
         setHasDrawnAlgorithm(state, hasDrawnAlgorithm){
             state.hasDrawnAlgorithm = hasDrawnAlgorithm;
+        },
+
+        updateWeightAmount(state, newWeightValue){
+            state.weightAmount = newWeightValue;
+        },
+
+        updateCurrentShortestDistance(state, newShortestDistance){
+            state.currentShortestDistance = newShortestDistance;
+        },
+
+        updateHighlightedDistance(state, newHighlightedDistance){
+            state.highlightedDistance = newHighlightedDistance;
         }
     },
 

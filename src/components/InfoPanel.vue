@@ -9,23 +9,21 @@
       <p class="panel-info">
       {{ this.allowedToDraw ? "Currently Allowed To Draw" : "Not Allowed To Draw!" }}
       </p>
-      <!--
       <p class="panel-info">
-      Shortest Path: {{ this.currentShortestDistance === Infinity ? "???" : this.currentShortestDistance }}
+      Shortest Path: {{ this.currentShortestDistance === Infinity ? "N/A" : this.currentShortestDistance }}
       </p>
       <p class="panel-info">
-      Highlighted Distance: {{ this.highlightedShortestDistance === Infinity ? "N/A" : this.highlightedShortestDistance }}
-      </p> -->
+      Highlighted Distance: {{ this.highlightedDistance === Infinity ? "N/A" : this.highlightedDistance }}
+      </p>
       <div 
         class="panel-div"
         :class="{disabled: !this.allowedToDraw}">
         <p class="panel-info">Weight Amount:</p>
         <input
           class="number-input"
-          type="number" 
-          :value="weight"
+          type="number"
           :disabled="!this.allowedToDraw"
-          @input="$emit('update:weight', parseInt($event.target.value))"/>
+          v-model="weight"/>
       </div>
     </div>
 </template>
@@ -35,8 +33,12 @@ import { mapState, mapGetters } from "vuex"
 export default ({
   name: "InfoPanel",
   computed: {
-    ...mapState(['allowedToDraw']),
-    ...mapGetters(['drawingMode'])
+    ...mapState(['allowedToDraw', 'currentShortestDistance', 'highlightedDistance']),
+    ...mapGetters(['drawingMode']),
+    weight: {
+      get(){ return this.$store.state.weightAmount},
+      set(newWeightValue){ this.$store.commit('updateWeightAmount', newWeightValue)},
+    },
   },
 })
 </script>

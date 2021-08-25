@@ -26,8 +26,7 @@
           :weight="node.weight"/>
     </div>
   </div>
-  <DataPanel
-    v-model:weight="this.weightAmount"/>
+  <DataPanel/>
 </template>
 
 <script>
@@ -45,7 +44,6 @@ export default {
     data(){
       return {
         grid: [],
-        weightAmount: 2,
         rowCount: 25,
         colCount: 25,
         startNodeRow: 10,
@@ -56,9 +54,7 @@ export default {
         hasEndNode: true,
         startNodeReference: null,
         endNodeReference: null,
-        hasDrawnAlgorithm: false,
         isMouseDown: false,
-        currentShortestDistance: Infinity,
         highlightedShortestDistance: Infinity,
       }
     },
@@ -138,11 +134,12 @@ export default {
             if (newNode.isEnd) this.endNodeReference = newNode;
           }
         }
-        this.currentShortestDistance = Infinity;
+
+        this.$store.commit("updateCurrentShortestDistance", Infinity);
 
         this.$store.commit("setAllowedToDraw", true);
 
-        this.hasDrawnAlgorithm = false;
+        this.$store.commit("setHasDrawnAlgorithm", false);
 
       },
 
@@ -183,13 +180,14 @@ export default {
       drawDijkstra(orderedNodeArray){
         this.$store.commit("setAllowedToDraw", false);
         const amountOfNodes = orderedNodeArray.length;
-        setTimeout(() => {this.hasDrawnAlgorithm = true}, 10 * amountOfNodes);
+        setTimeout(() => {this.$store.commit("setHasDrawnAlgorithm", true)}, 10 * amountOfNodes);
         for (let i = 0; i < amountOfNodes; i++) {
           setTimeout(() => {
             orderedNodeArray[i].isDrawn = true;
           }, i * 10); 
         }
-        this.currentShortestDistance = this.endNodeReference.distance;
+
+        this.$store.commit("updateCurrentShortestDistance", this.endNodeReference.distance);
       },
 
       setMouseDown(rowIndex, colIndex) {
@@ -213,7 +211,7 @@ export default {
 
           this.$store.commit('setIsPlacingStartNode', false);
           
-          this.currentShortestDistance = Infinity;
+          this.$store.commit("updateCurrentShortestDistance", Infinity);
         }
 
         if (this.isPlacingEndNode){
@@ -229,7 +227,7 @@ export default {
 
           this.$store.commit('setIsPlacingEndNode', false);
 
-          this.currentShortestDistance = Infinity;
+          this.$store.commit("updateCurrentShortestDistance", Infinity);
         }
 
         if (node.isStart || node.isEnd) {
@@ -265,7 +263,7 @@ export default {
 
         // check if the node isVisited and if it is drawn. If so, backtrack and style.
         if (this.hasDrawnAlgorithm && node.isDrawn) {
-          this.highlightedShortestDistance = node.distance;
+          this.$store.commit("updateHighlightedDistance", node.distance);
 
           let targetNode = node;
 
@@ -343,7 +341,8 @@ export default {
         const node = this.grid[rowIndex][colIndex];
 
         if (this.hasDrawnAlgorithm && node.isDrawn) {
-          this.highlightedShortestDistance = Infinity;
+          this.$store.commit("updateHighlightedDistance", Infinity);
+
           let targetNode = node;
 
           while (targetNode !== null) {
@@ -356,11 +355,13 @@ export default {
     },
     computed: {
       ...mapState([
-          'isPlacingStartNode',
-          'isPlacingEndNode',
-          'isPlacingWeights',
-          'shouldFillWall',
-          'allowedToDraw',
+          "isPlacingStartNode",
+          "isPlacingEndNode",
+          "isPlacingWeights",
+          "shouldFillWall",
+          "allowedToDraw",
+          "weightAmount",
+          "hasDrawnAlgorithm"
       ]),
     },
     mounted(){

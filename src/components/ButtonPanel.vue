@@ -44,11 +44,11 @@
         :disabled="!this.allowedToDraw">
         Fill With Wall
       </button>
-      <button @click="$emit('run-dijkstra')">
+      <button @click="this.emitter.emit('run-dijkstra')">
         <!-- make this a computed property... -->
         {{ (this.hasDrawnAlgorithm)  ? "Re-run Algorithm" : ""}}
         {{ (!this.hasDrawnAlgorithm && this.allowedToDraw) ? "Run Dijkstra's Algorithm" : "" }}
-        {{ (!this.hasDrawnAlgorithm && ! this.allowedToDraw) ? "Running..." : "" }}
+        {{ (!this.hasDrawnAlgorithm && !this.allowedToDraw) ? "Running..." : "" }}
       </button>
       <button 
         @click="this.emitter.emit('reset-drawn-graph')"
